@@ -7,11 +7,18 @@ import (
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
 )
 
-type Exchange struct {
-	PairCharge []api.GetPairData
+type telegramBot struct {
+	handler api.MessageHandler
 }
 
-func (e *Exchange) Process(token string) {
+func New(handler api.MessageHandler) telegramBot {
+	bot := telegramBot{}
+	bot.handler = handler
+
+	return bot
+}
+
+func (b *telegramBot) Process(token string) {
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		log.Panic(err)
@@ -34,27 +41,9 @@ func (e *Exchange) Process(token string) {
 		Text := update.Message.Text
 		log.Printf("[%s] %d %s", UserName, ChatID, Text)
 
-		text := e.selectMessage(Text)
+		text := b.handler.Handle(Text)
 		msg := tgbotapi.NewMessage(ChatID, text)
 
 		bot.Send(msg)
 	}
-}
-
-func (e *Exchange) selectMessage(text string) string {
-	var result string
-	switch text {
-	case "/help":
-		result = "Available commands: \n /show - Show all available trade pairs."
-		break
-	case "/show":
-		for _, item := range e.PairCharge {
-			result += item.Content() + "\n"
-		}
-		break
-	default:
-		result = "Not available command."
-	}
-
-	return result
 }

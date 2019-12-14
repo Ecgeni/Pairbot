@@ -25,7 +25,8 @@ func main() {
 	var a api.GetPairData = api.NewAlfaBank(alfabankSymbols)
 	var b api.GetPairData = api.NewBinance(binanceSymbols)
 	var pairCharges = []api.GetPairData{a, b}
-	var telegbot bot.Exchange = bot.Exchange{pairCharges}
+	exchangeHandler := api.NewExchange(pairCharges)
+	telegbot := bot.New(&exchangeHandler)
 
 	telegbot.Process(tokenBot)
 }
